@@ -36,10 +36,71 @@ def alpha_schedule(beg, end, epoch, final_val):
         return float(final_val) * (epoch - beg) / (end - beg)
 
 def make_pair(data, is_eval=False):
+    # data  = from_train_data
     items = data["pairs"]
     generate_nums = data["generate_nums"]
     copy_nums = data["copy_nums"]
-
+    '''
+    "tokens": [
+                "[CLS]",
+                "广",
+                "场",
+                "新",
+                "种",
+                "了",
+                "一",
+                "批",
+                "花",
+                "木",
+                "，",
+                "其",
+                "中",
+                "[num]",
+                "是",
+                "玫",
+                "瑰",
+                "，",
+                "[num]",
+                "是",
+                "月",
+                "季",
+                "．",
+                "已",
+                "知",
+                "月",
+                "季",
+                "有",
+                "[num]",
+                "棵",
+                "，",
+                "玫",
+                "瑰",
+                "有",
+                "多",
+                "少",
+                "棵",
+                "？",
+                "[SEP]"
+            ],
+            "expression": [
+                "N2",
+                "/",
+                "N1",
+                "*",
+                "N0"
+            ],
+            "nums": [
+                "(5/16)",
+                "(3/8)",
+                "36"
+            ],
+            "num_pos": [
+                13,
+                18,
+                28
+            ]
+        }
+        '''
     temp_pairs = []
     for p in items:
         if not is_eval:
@@ -116,7 +177,34 @@ def train_model(args, train_pairs, test_pairs, generate_num_ids,
 
     contra_pair = None
     subtree_pos_pair = None
-    
+    '''
+    contra-pair has example of MathQA-MathQA
+    {
+    "pairs": [ #represents in the contra_pair
+        [
+            8724,
+            9091,
+            1654,
+            4977,
+            16267,
+            14891,
+            9096
+        ],[...],...],
+     "pos": [     # represents subtree_poss_pair
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            2
+        ],
+        [
+            0,
+            4
+        ],...
+    }
+    '''
     logger.info("Loading contra pair file: {}".format(args.contra_pair))
     contra_pair = json.load(open(os.path.join(args.data_dir, args.contra_pair), 'r', encoding='utf-8'))
     if isinstance(contra_pair, dict):
@@ -124,8 +212,8 @@ def train_model(args, train_pairs, test_pairs, generate_num_ids,
         contra_pair = contra_pair["pairs"]
 
     t_total = (len(contra_pair) // batch_size + 1) * args.n_epochs
-    logger.info("Num of Training Data = {}".format(len(contra_pair)))
-    logger.info("Total Steps = {}".format(t_total))
+    logger.info("Num of Training Data = {}".format(len(contra_pair))) # in 23k-QA, we have 70769 multi-pairs
+    logger.info("Total Steps = {}".format(t_total)) 
     optimizer = AdamW([{'params': need_optimized_parameters, 'weight_decay': 0.0}], lr=args.learning_rate)
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=t_total)
 

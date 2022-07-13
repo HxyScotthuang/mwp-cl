@@ -645,7 +645,7 @@ def prepare_data(pairs_trained, pairs_tested_or_valed, trim_min_count, generate_
             print("bert_tokenizer", bert_pretrain_path)
             bert_tokenizer = BertTokenizer.from_pretrained(bert_pretrain_path)
         len_bert_token = len(bert_tokenizer)
-
+    #pair = (p["tokens"], from_infix_to_prefix(p["expression"]), p["nums"], p["num_pos"])
     print("Indexing words...")
     for pair in pairs_trained:
         if not tree:
@@ -678,7 +678,7 @@ def prepare_data(pairs_trained, pairs_tested_or_valed, trim_min_count, generate_
 
         num_stack.reverse()
         input_cell = indexes_from_sentence(input_lang, pair[0])
-        output_cell = indexes_from_sentence(output_lang, pair[1], tree)
+        output_cell = indexes_from_sentence(output_lang, pair[1], tree) # pair[1] is the expression
         if use_bert:
             input_cell = bert_tokenizer.convert_tokens_to_ids(pair[0])
         train_pairs.append((input_cell, len(input_cell), output_cell, len(output_cell),
@@ -877,21 +877,74 @@ def append_ret(datas, new_ret): # will change data
     return datas
 
 def prepare_contra_train_batch(train_pairs, batch_size, contra_pair_in, subtree_pos_pair_in, args, neg_sample_num, neg_sample_from_pair_file=False):
+    '''
+    contra_pair_in is in form 
+    [ 
+        [
+            8724,
+            9091,
+            1654,
+            4977,
+            16267,
+            14891,
+            9096
+        ],[...],...]
+
+    subtree_pos_pair_in is in form
+    [   
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            2
+        ],
+        [
+            0,
+            4
+        ],...
+
+    '''
     contra_pair = copy.deepcopy(contra_pair_in)
     if args.contra_common_tree_pair:
         subtree_pos_pair = copy.deepcopy(subtree_pos_pair_in)
-        contra_pair_item_len = len(contra_pair[0])
-        merge = [ x + y for x, y in zip(contra_pair, subtree_pos_pair) if max(y) < MAX_OUTPUT_LENGTH]
+        contra_pair_item_len = len(contra_pair[0])# how many contra pair is there
+        merge = [ x + y for x, y in zip(contra_pair, subtree_pos_pair) if max(y) < MAX_OUTPUT_LENGTH] 
+        # merge is the 1-1 corrspond for contra-pair and subtree_pos_pair
+        # Merge looks like this:
+        # [[15638, 36465, 24733, 27339, 32374, 0, 6], ...]
         random.shuffle(merge)
         contra_pair = [_[:contra_pair_item_len] for _ in merge]
+        # contra_pair looks like this: [[15638, 36465, 24733, 27339, 32374], ...]
         subtree_pos_pair = [_[contra_pair_item_len:] for _ in merge]
+        # subtree_pos_pair looks like this:  [[0, 6], ...]
     else:
         random.shuffle(contra_pair)
     # positive pair
     train_pairs1 = [copy.deepcopy(train_pairs[p[0]]) for p in contra_pair] # if not deepcopy, it will cause bug when padding
     train_pairs2 = [copy.deepcopy(train_pairs[p[1]]) for p in contra_pair]
+    # an element of train_pairs1 and train_pairs2 looks like this: 
+    '''
+    (
+        [101, 1651, 1681, 4270, 5975, 100, 1660, 100, 5975, 2503, 4353, 100, 10032, 8430, 1681, 4270, 134, 10034, 102],  input cell = bert+p["tokens"]
+        19,     (length of input cell)
+        [1, 2, 29, 28, 27],   output_cell
+        5,                    length of output cell
+        ['(2/5)', '6', '30'],    pair2, p["nums"]
+        [5, 7, 11],        pair3 ["num_pos"]
+        []                 num_stack
+    ), 
+
+    where it shows: input_cell, len(input_cell), pair[1], 0, pair[2], pair[3], num_stack]
+    '''
     ret = prepare_train_batch(train_pairs1, batch_size, shuffle=False)
     ret = list(ret)
+    '''
+    ret looks like this:
+    [[[101, 1651, 1681, 4270, 5975, 100, 1660, 100, 5975, 2503, ...
+
+    '''
     for i, data in enumerate(ret):
         ret[i] = [(_,) for _ in data]
     ret = append_ret(ret, prepare_train_batch(train_pairs2, batch_size, shuffle=False))
