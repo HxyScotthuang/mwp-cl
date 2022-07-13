@@ -2,7 +2,7 @@
 
 python3 run_cl.py \
     --output_dir output/mwp-cl-multilingual \
-    --bert_pretrain_path pretrained_models/bert-base-multilingual-uncased \
+    --bert_pretrain_path bert-base-multilingual-uncased \
     --data_dir data \
     --train_file Math_23K-MathQA_mbert_token_train.json \
     --dev_file_1 Math_23K_mbert_token_val.json \

@@ -2,7 +2,7 @@
 
 python3 run_ft.py \
     --output_dir output/mwp-ft-monolingual-en \
-    --bert_pretrain_path pretrained_models/bert-base-uncased \
+    --bert_pretrain_path bert-base-uncased \
     --model_reload_path output/mwp-cl-monolingual-en/epoch_29 \
     --data_dir data \
     --train_file MathQA_bert_token_train.json \

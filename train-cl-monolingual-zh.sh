@@ -2,7 +2,7 @@
 
 python3 run_cl.py \
     --output_dir output/mwp-cl-monolingual-zh \
-    --bert_pretrain_path pretrained_models/bert-base-chinese \
+    --bert_pretrain_path bert-base-chinese \
     --data_dir data \
     --contra_pair pairs/Math_23K-Math_23K-sample.json \
     --train_file Math_23K_bert_token_train.json \

@@ -2,7 +2,7 @@
 
 python3 run_cl.py \
     --output_dir output/mwp-cl-monolingual-en \
-    --bert_pretrain_path pretrained_models/bert-base-uncased \
+    --bert_pretrain_path bert-base-uncased \
     --data_dir data \
     --contra_pair pairs/MathQA-MathQA-sample.json \
     --train_file MathQA_bert_token_train.json \
@@ -12,7 +12,7 @@ python3 run_cl.py \
     --test_file_2 MathQA_bert_token_test.json \
     --batch_size 16 \
     --learning_rate 5e-5 \
-    --n_epochs 30 \
+    --n_epochs 1 \
     --n_save_ckpt 3 \
     --n_val 5 \
     --embedding_size 128 \
