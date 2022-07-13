@@ -314,7 +314,7 @@ if __name__=='__main__':
     parser.add_argument('--contra_loss_margin', default=0.2, type=float)
     parser.add_argument('--contra_common_tree_pair', action='store_true', help='contra learn use common_tree pair')
 
-    parser.add_argument('--neg_sample', default=1 type=int, help="Neg sample num for contra learn")
+    parser.add_argument('--neg_sample', default=1, type=int, help="Neg sample num for contra learn")
     parser.add_argument('--neg_sample_from_pair_file', action='store_true', help='if true: neg samples from pair file, else: random neg sample')
     parser.add_argument('--neg_no_expr_loss', action='store_true', help='neg samples not compute expression loss')
     
